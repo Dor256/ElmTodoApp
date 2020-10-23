@@ -7,8 +7,9 @@ import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode as Json
 import Header exposing (header)
 import Checkbox exposing (checkbox)
-import Api exposing (Todo, getTodos, ApiAction)
+import Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
 import Http
+import Array
 
 main: Program () Model Action
 main =
@@ -43,12 +44,15 @@ init _ =
 
 
 type Action = 
-  Toggle Int
+  Toggle String
   | ChangeText String
   | KeyPress Int
   | ClearAllDone
-  | ClearTodo Int
-  | GotTodos ApiAction
+  | ClearTodo String
+  | GotTodos BatchAction
+  | AddedTodo SingleAction
+  | UpdatedTodo SingleAction
+  | DeletedTodo SingleAction
 
 
 onKeyPress: (Int -> msg) -> Attribute msg 
@@ -61,42 +65,70 @@ enterKey = 13
 update : Action -> Model -> (Model, Cmd Action)
 update msg model =
    case msg of
-        Toggle index ->
-          ({ model | todos = (List.indexedMap (checkItem index) model.todos ) }, Cmd.none)
+        Toggle id ->
+          ({ model | todos = (List.map (checkItem id) model.todos ) }
+          , toggleTodoCheck UpdatedTodo (getTodoById model.todos id))
 
         ChangeText text -> 
           ({ model | search = text }, Cmd.none)
 
         KeyPress key ->
-          if key == enterKey then 
-            ({ model | todos = model.todos ++ [{ content = model.search, isDone = False }], search = "" }, Cmd.none)
+          if key == enterKey then
+            (model
+            , addTodo AddedTodo { content = model.search, isDone = False, id = ""}
+            )
           else
             (model, Cmd.none)
 
         ClearAllDone -> 
           ({ model | todos = List.filter (\todo -> not todo.isDone) model.todos }, Cmd.none)
 
-        ClearTodo index -> 
-          ({ model | todos = removeTodoByIndex index model.todos }, Cmd.none)
+        ClearTodo id -> 
+          ({ model | todos = removeTodoById id model.todos }
+          , deleteTodo DeletedTodo (getTodoById model.todos id)
+          )
 
         GotTodos (Ok res) ->
             ({ model | todos = res, response = Success }, Cmd.none)
 
         GotTodos (Err err) ->
           ({ model | response = Failure }, Cmd.none)
+        
+        AddedTodo (Ok res) -> 
+          ({ model | todos = model.todos ++ [{ content = model.search, isDone = False, id = res.id }], search = "" }, Cmd.none)
+        
+        AddedTodo (Err err) -> 
+          (model, Cmd.none)
+        
+        UpdatedTodo (Ok res) ->
+          (model, Cmd.none)
+        
+        UpdatedTodo (Err err) -> 
+          (model, Cmd.none)
+
+        DeletedTodo (Ok res) ->
+          (model, Cmd.none)
+
+        DeletedTodo (Err err) ->
+          (model, Cmd.none)
 
 
 
-checkItem: Int -> Int -> Todo -> Todo
-checkItem indexToCheck index todo =
-  if indexToCheck == index then
+checkItem: String -> Todo -> Todo
+checkItem idToCheck todo =
+  if idToCheck == todo.id then
     { todo | isDone = not todo.isDone }
   else
     todo
 
-removeTodoByIndex: Int -> (List Todo) -> List Todo
-removeTodoByIndex index todos = 
-  (List.take index todos) ++ (List.drop (index + 1) todos)
+removeTodoById: String -> (List Todo) -> List Todo
+removeTodoById id todos = 
+  List.filter (\todo -> todo.id /= id) todos
+
+getTodoById: (List Todo) -> String -> Maybe Todo
+getTodoById todos id =
+  List.head (List.filter (\todo -> todo.id == id) todos)
+    
 
 subscriptions: Model -> Sub Action
 subscriptions model =
@@ -145,5 +177,5 @@ view model =
             , style "flex-direction" "column"
             , style "justify-content" "space-between"
             ]
-            <| List.indexedMap (\i todo -> checkbox { toggle = (Toggle i), clear = (ClearTodo i) } todo.content todo.isDone) model.todos
+            <| List.map (\todo -> checkbox { toggle = (Toggle todo.id), clear = (ClearTodo todo.id) } todo.content todo.isDone) model.todos
         ]

@@ -1,19 +1,33 @@
 {
   "todos": [
     {
+      "id": "3e62d0d7-fc48-4665-9934-3c299871c553",
       "content": "Create deno server",
       "isDone": true
     },
     {
+      "id": "c4e7b44e-205f-41ea-827c-7fc2a1c56e3f",
       "content": "Add single todo clear functionality",
-      "isDone": false
+      "isDone": true
     },
     {
+      "id": "8f28bd8d-8d6e-4ef6-8bd6-23eb3c65f97f",
       "content": "Add persistency",
+      "isDone": true
+    },
+    {
+      "id": "e7f42e0f-cad4-449c-89a4-f0871ec14598",
+      "content": "Add better error logs",
       "isDone": false
     },
     {
-      "content": "Add better error logs",
+      "id": "df254311-2af3-419d-8fd1-ba95746b5131",
+      "content": "Add unique IDs to todos",
+      "isDone": true
+    },
+    {
+      "id": "a80b0d8b-f6a4-4a0e-bc05-5d0d1336971a",
+      "content": "Extract inline styles to CSS",
       "isDone": false
     }
   ]
