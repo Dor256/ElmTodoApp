@@ -1,13 +1,8 @@
 module Header exposing (header)
 
 import Html exposing (..)
-import Html.Attributes exposing (style, type_)
+import Html.Attributes exposing (class)
 
 header: Html msg
 header = 
-  h1
-    [
-      style "text-transform" "uppercase"
-    , style "text-align" "center"
-    ]
-    [ text "Todo List" ]
+  h1 [ class "header" ] [ text "Todo List" ]

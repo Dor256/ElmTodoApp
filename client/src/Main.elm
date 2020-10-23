@@ -7,6 +7,7 @@ import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode as Json
 import Header exposing (header)
 import Checkbox exposing (checkbox)
+import Searchbar exposing (searchbar)
 import Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
 import Http
 import Array
@@ -55,9 +56,9 @@ type Action =
   | DeletedTodo SingleAction
 
 
-onKeyPress: (Int -> msg) -> Attribute msg 
-onKeyPress mapper =
-  on "keypress" (Json.map mapper keyCode)
+-- onKeyPress: (Int -> msg) -> Attribute msg 
+-- onKeyPress mapper =
+--   on "keypress" (Json.map mapper keyCode)
 
 enterKey: Int
 enterKey = 13
@@ -157,16 +158,7 @@ view model =
           , style "justify-content" "flex-end"
           ]
           [
-            input
-              [ 
-                type_ "text"
-              , onInput ChangeText
-              , onKeyPress KeyPress
-              , placeholder "Enter todo..."
-              , value model.search
-              , class "searchbar"
-              ]
-              []
+            searchbar { onChange = ChangeText, onEnterPressed = KeyPress } model.search
           , button
               [ onClick ClearAllDone, class "clear-button" ]
               [text "Clear finished"]

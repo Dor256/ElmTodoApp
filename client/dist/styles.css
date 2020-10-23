@@ -1,3 +1,12 @@
+body {
+  font-family: "Helvetica Neue"
+}
+
+.header {
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .checkbox {
   opacity: 0;
   cursor: pointer;
@@ -5,10 +14,14 @@
   width: 0;
 }
 
-.checkbox-container {
+.todo-container {
   display: flex;
   margin-bottom: 3%;
   align-items: center;
+}
+
+.checkbox-container {
+  display: inline-flex;
 }
 
 .checkmark {
@@ -30,7 +43,7 @@
   display: none;
 }
 
-.checkbox-container .checkbox:checked + .checkmark:after {
+.todo-container .checkbox:checked + .checkmark:after {
   content: "\2713\0020";
   color: white;
   text-align: center;
@@ -38,7 +51,7 @@
   display: block;
 }
 
-.checkbox-container .checkbox:checked + .checkmark {
+.todo-container .checkbox:checked + .checkmark {
   background-color: #3b92cc;
 }
 
