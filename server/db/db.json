@@ -1,0 +1,20 @@
+{
+  "todos": [
+    {
+      "content": "Create deno server",
+      "isDone": true
+    },
+    {
+      "content": "Add single todo clear functionality",
+      "isDone": false
+    },
+    {
+      "content": "Add persistency",
+      "isDone": false
+    },
+    {
+      "content": "Add better error logs",
+      "isDone": false
+    }
+  ]
+}
