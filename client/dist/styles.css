@@ -1,5 +1,8 @@
 .checkbox {
+  opacity: 0;
   cursor: pointer;
+  height: 0;
+  width: 0;
 }
 
 .checkbox-container {
@@ -7,8 +10,50 @@
   margin-bottom: 3%;
 }
 
-.checkbox:checked + label.checkbox-label {
+.checkmark {
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 7px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.checkmark:after {
+  content: "";
+  display: none;
+}
+
+.checkbox-container .checkbox:checked + .checkmark:after {
+  content: "\2713\0020";
+  color: white;
+  text-align: center;
+  padding-top: 4px;
+  display: block;
+}
+
+.checkbox-container .checkbox:checked + .checkmark {
+  background-color: #3b92cc;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+  background-color: #ccc;
+}
+
+.checkbox:checked ~ label.checkbox-label {
   text-decoration: line-through;
+}
+
+.checkbox-label {
+  padding-top: 3px;
 }
 
 input.searchbar {
@@ -22,6 +67,16 @@ input.searchbar {
   margin-bottom: 10%;
   box-shadow: 0 2px 6px 1px #e1e5e8;
   color: #20455e;
+  -webkit-transition: box-shadow 200ms linear;
+  -ms-transition:  box-shadow 200ms linear;
+  transition:  box-shadow 200ms linear;
+}
+
+input.searchbar:hover {
+  -webkit-transition: box-shadow 200ms linear;
+  -ms-transition:  box-shadow 200ms linear;
+  transition:  box-shadow 200ms linear;
+  box-shadow: 0 4px 6px 1px #e1e5e8;
 }
 
 button.clear-button {

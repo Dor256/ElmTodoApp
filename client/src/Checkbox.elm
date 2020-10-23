@@ -9,5 +9,6 @@ checkbox msg title isDone =
     [class "checkbox-container"]
     [
       input [ name title, type_ "checkbox", onClick msg, checked isDone, class "checkbox" ] []
+    , span [ class "checkmark", onClick msg ] []
     , label [ for title, class "checkbox-label" ] [ text title ]
     ]

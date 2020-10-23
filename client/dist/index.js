@@ -5985,6 +5985,7 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$input = _VirtualDom_node('input');
 var elm$html$Html$label = _VirtualDom_node('label');
+var elm$html$Html$span = _VirtualDom_node('span');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$bool = _Json_wrap;
@@ -6044,6 +6045,14 @@ var author$project$Checkbox$checkbox = F3(
 							elm$html$Html$Events$onClick(msg),
 							elm$html$Html$Attributes$checked(isDone),
 							elm$html$Html$Attributes$class('checkbox')
+						]),
+					_List_Nil),
+					A2(
+					elm$html$Html$span,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('checkmark'),
+							elm$html$Html$Events$onClick(msg)
 						]),
 					_List_Nil),
 					A2(
