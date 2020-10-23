@@ -4485,11 +4485,8 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$GotTodos = function (a) {
-	return {$: 'GotTodos', a: a};
-};
-var author$project$Main$Loading = {$: 'Loading'};
-var author$project$Main$Todo = F2(
+var author$project$Api$baseUrl = 'http://localhost:3000';
+var author$project$Api$Todo = F2(
 	function (isDone, content) {
 		return {content: content, isDone: isDone};
 	});
@@ -4972,13 +4969,13 @@ var elm$json$Json$Decode$bool = _Json_decodeBool;
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$string = _Json_decodeString;
-var author$project$Main$todoDecoder = A3(
+var author$project$Api$todoDecoder = A3(
 	elm$json$Json$Decode$map2,
-	author$project$Main$Todo,
+	author$project$Api$Todo,
 	A2(elm$json$Json$Decode$field, 'isDone', elm$json$Json$Decode$bool),
 	A2(elm$json$Json$Decode$field, 'content', elm$json$Json$Decode$string));
 var elm$json$Json$Decode$list = _Json_decodeList;
-var author$project$Main$todoListDecoder = elm$json$Json$Decode$list(author$project$Main$todoDecoder);
+var author$project$Api$todoListDecoder = elm$json$Json$Decode$list(author$project$Api$todoDecoder);
 var elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -5860,14 +5857,21 @@ var elm$http$Http$get = function (r) {
 	return elm$http$Http$request(
 		{body: elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: elm$core$Maybe$Nothing, tracker: elm$core$Maybe$Nothing, url: r.url});
 };
+var author$project$Api$getTodos = function (action) {
+	return elm$http$Http$get(
+		{
+			expect: A2(elm$http$Http$expectJson, action, author$project$Api$todoListDecoder),
+			url: author$project$Api$baseUrl + '/todos'
+		});
+};
+var author$project$Main$GotTodos = function (a) {
+	return {$: 'GotTodos', a: a};
+};
+var author$project$Main$Loading = {$: 'Loading'};
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
 		{response: author$project$Main$Loading, search: '', todos: _List_Nil},
-		elm$http$Http$get(
-			{
-				expect: A2(elm$http$Http$expectJson, author$project$Main$GotTodos, author$project$Main$todoListDecoder),
-				url: 'http://localhost:3000/todos'
-			}));
+		author$project$Api$getTodos(author$project$Main$GotTodos));
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
@@ -5875,9 +5879,7 @@ var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
 var author$project$Main$Failure = {$: 'Failure'};
-var author$project$Main$Success = function (a) {
-	return {$: 'Success', a: a};
-};
+var author$project$Main$Success = {$: 'Success'};
 var elm$core$Basics$not = _Basics_not;
 var author$project$Main$checkItem = F3(
 	function (indexToCheck, index, todo) {
@@ -5954,9 +5956,7 @@ var author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								response: author$project$Main$Success(res)
-							}),
+							{response: author$project$Main$Success, todos: res}),
 						elm$core$Platform$Cmd$none);
 				} else {
 					var err = msg.a.a;
@@ -5982,25 +5982,9 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
-var author$project$Styles$checkboxContainerStyle = function (checked) {
-	return _List_fromArray(
-		[
-			A2(elm$html$Html$Attributes$style, 'display', 'flex'),
-			A2(
-			elm$html$Html$Attributes$style,
-			'text-decoration',
-			checked ? 'line-through' : 'none')
-		]);
-};
-var author$project$Styles$checkboxStyle = _List_fromArray(
-	[
-		A2(elm$html$Html$Attributes$style, 'margin-bottom', '3%'),
-		A2(elm$html$Html$Attributes$style, 'cursor', 'pointer')
-	]);
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$bool = _Json_wrap;
@@ -6020,6 +6004,9 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$for = elm$html$Html$Attributes$stringProperty('htmlFor');
+var elm$html$Html$Attributes$name = elm$html$Html$Attributes$stringProperty('name');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6042,24 +6029,39 @@ var author$project$Checkbox$checkbox = F3(
 	function (msg, title, isDone) {
 		return A2(
 			elm$html$Html$div,
-			author$project$Styles$checkboxContainerStyle(isDone),
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('checkbox-container')
+				]),
 			_List_fromArray(
 				[
 					A2(
 					elm$html$Html$input,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								elm$html$Html$Attributes$type_('checkbox'),
-								elm$html$Html$Events$onClick(msg),
-								elm$html$Html$Attributes$checked(isDone)
-							]),
-						author$project$Styles$checkboxStyle),
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$name(title),
+							elm$html$Html$Attributes$type_('checkbox'),
+							elm$html$Html$Events$onClick(msg),
+							elm$html$Html$Attributes$checked(isDone),
+							elm$html$Html$Attributes$class('checkbox')
+						]),
 					_List_Nil),
-					elm$html$Html$text(title)
+					A2(
+					elm$html$Html$label,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$for(title),
+							elm$html$Html$Attributes$class('checkbox-label')
+						]),
+					_List_fromArray(
+						[
+							elm$html$Html$text(title)
+						]))
 				]));
 	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var author$project$Header$header = A2(
 	elm$html$Html$h1,
 	_List_fromArray(
@@ -6089,30 +6091,6 @@ var author$project$Main$onKeyPress = function (mapper) {
 		'keypress',
 		A2(elm$json$Json$Decode$map, mapper, elm$html$Html$Events$keyCode));
 };
-var author$project$Styles$buttonStyle = _List_fromArray(
-	[
-		A2(elm$html$Html$Attributes$style, 'margin-left', '10%'),
-		A2(elm$html$Html$Attributes$style, 'background', 'none'),
-		A2(elm$html$Html$Attributes$style, 'border', 'none'),
-		A2(elm$html$Html$Attributes$style, 'cursor', 'pointer'),
-		A2(elm$html$Html$Attributes$style, 'outline', 'none'),
-		A2(elm$html$Html$Attributes$style, 'color', 'blue'),
-		A2(elm$html$Html$Attributes$style, 'text-decoration', 'underline'),
-		A2(elm$html$Html$Attributes$style, 'align-self', 'flex-start')
-	]);
-var author$project$Styles$searchBarStyle = _List_fromArray(
-	[
-		A2(elm$html$Html$Attributes$style, 'align-self', 'center'),
-		A2(elm$html$Html$Attributes$style, 'width', '50%'),
-		A2(elm$html$Html$Attributes$style, 'padding', '10px 20px'),
-		A2(elm$html$Html$Attributes$style, 'border', '1px solid #fff'),
-		A2(elm$html$Html$Attributes$style, 'border-radius', '5px'),
-		A2(elm$html$Html$Attributes$style, 'box-shadow', '0 2px 6px 1px #e1e5e8'),
-		A2(elm$html$Html$Attributes$style, 'color', '#20455e'),
-		A2(elm$html$Html$Attributes$style, 'font-weight', '600'),
-		A2(elm$html$Html$Attributes$style, 'outline', '0'),
-		A2(elm$html$Html$Attributes$style, 'margin-bottom', '10%')
-	]);
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -6155,7 +6133,6 @@ var author$project$Main$view = function (model) {
 		case 'Loading':
 			return elm$html$Html$text('Loading...');
 		default:
-			var todos = _n0.a;
 			return A2(
 				elm$html$Html$div,
 				_List_fromArray(
@@ -6179,25 +6156,23 @@ var author$project$Main$view = function (model) {
 							[
 								A2(
 								elm$html$Html$input,
-								_Utils_ap(
-									_List_fromArray(
-										[
-											elm$html$Html$Attributes$type_('text'),
-											elm$html$Html$Events$onInput(author$project$Main$ChangeText),
-											author$project$Main$onKeyPress(author$project$Main$KeyPress),
-											elm$html$Html$Attributes$placeholder('Enter todo...'),
-											elm$html$Html$Attributes$value(model.search)
-										]),
-									author$project$Styles$searchBarStyle),
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$type_('text'),
+										elm$html$Html$Events$onInput(author$project$Main$ChangeText),
+										author$project$Main$onKeyPress(author$project$Main$KeyPress),
+										elm$html$Html$Attributes$placeholder('Enter todo...'),
+										elm$html$Html$Attributes$value(model.search),
+										elm$html$Html$Attributes$class('searchbar')
+									]),
 								_List_Nil),
 								A2(
 								elm$html$Html$button,
-								_Utils_ap(
-									_List_fromArray(
-										[
-											elm$html$Html$Events$onClick(author$project$Main$Clear)
-										]),
-									author$project$Styles$buttonStyle),
+								_List_fromArray(
+									[
+										elm$html$Html$Events$onClick(author$project$Main$Clear),
+										elm$html$Html$Attributes$class('clear-button')
+									]),
 								_List_fromArray(
 									[
 										elm$html$Html$text('Clear finished')
@@ -6221,7 +6196,7 @@ var author$project$Main$view = function (model) {
 										todo.content,
 										todo.isDone);
 								}),
-							todos))
+							model.todos))
 					]));
 	}
 };

@@ -1,13 +1,13 @@
-module Main exposing ( init, update, view)
+module Main exposing (init, update, view, subscriptions)
 
 import Browser exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (style, type_, placeholder, value)
+import Html.Attributes exposing (style, type_, placeholder, value, class)
 import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode as Json
 import Header exposing (header)
 import Checkbox exposing (checkbox)
-import Styles exposing (searchBarStyle, buttonStyle)
+import Api exposing (Todo, getTodos)
 import Http
 
 main: Program () Model Action
@@ -19,14 +19,10 @@ main =
     , view = view 
     }
 
-
-type alias Todo =
-  { isDone: Bool, content: String }
-
 type Response
   = Failure
   | Loading
-  | Success (List Todo)
+  | Success
 
 type alias Model = 
     { todos: List Todo
@@ -41,10 +37,8 @@ init _ =
     , search = ""
     , response = Loading
     }
-  , Http.get
-    { url = "http://localhost:3000/todos"
-    , expect = Http.expectJson GotTodos todoListDecoder
-    }
+  ,
+    getTodos GotTodos
   )
 
 
@@ -75,7 +69,7 @@ update msg model =
         Clear -> 
           ({ model | todos = List.filter (\todo -> not todo.isDone) model.todos }, Cmd.none)
         GotTodos (Ok res) ->
-          ({ model | response = Success res }, Cmd.none)
+            ({ model | todos = res, response = Success }, Cmd.none)
         GotTodos (Err err) ->
           ({ model | response = Failure }, Cmd.none)
 
@@ -99,7 +93,7 @@ view model =
       text "Something went wrong!"
     Loading ->
       text "Loading..."
-    Success todos ->
+    Success ->
       div
         [
           style "margin-left" "25%"
@@ -116,16 +110,17 @@ view model =
           ]
           [
             input
-              ([ 
+              [ 
                 type_ "text"
               , onInput ChangeText
               , onKeyPress KeyPress
               , placeholder "Enter todo..."
               , value model.search
-              ] ++ searchBarStyle)
+              , class "searchbar"
+              ]
               []
           , button
-              ([ onClick Clear ] ++ buttonStyle)
+              [ onClick Clear, class "clear-button" ]
               [text "Clear finished"]
           ]
         , div 
@@ -134,15 +129,5 @@ view model =
             , style "flex-direction" "column"
             , style "justify-content" "space-between"
             ]
-            <| List.indexedMap (\i todo -> checkbox (Toggle i) todo.content todo.isDone) todos
+            <| List.indexedMap (\i todo -> checkbox (Toggle i) todo.content todo.isDone) model.todos
         ]
-
-todoListDecoder: Json.Decoder (List Todo)
-todoListDecoder =
-  Json.list todoDecoder
-
-todoDecoder: Json.Decoder Todo
-todoDecoder = 
-  Json.map2 Todo
-    (Json.field "isDone" Json.bool)
-    (Json.field "content" Json.string)

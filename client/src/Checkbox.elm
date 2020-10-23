@@ -1,15 +1,13 @@
 module Checkbox exposing (checkbox)
 import Html exposing (..)
-import Html.Attributes exposing (style, type_, checked)
+import Html.Attributes exposing (style, type_, checked, class, name, for)
 import Html.Events exposing (onClick)
-import Styles exposing (checkboxContainerStyle)
-import Styles exposing (checkboxStyle)
 
 checkbox: msg -> String -> Bool -> Html msg
 checkbox msg title isDone =
   div 
-    (checkboxContainerStyle isDone)
+    [class "checkbox-container"]
     [
-      input ([ type_ "checkbox", onClick msg, checked isDone ] ++ checkboxStyle) []
-    , text title
+      input [ name title, type_ "checkbox", onClick msg, checked isDone, class "checkbox" ] []
+    , label [ for title, class "checkbox-label" ] [ text title ]
     ]
