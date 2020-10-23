@@ -8,6 +8,7 @@
 .checkbox-container {
   display: flex;
   margin-bottom: 3%;
+  align-items: center;
 }
 
 .checkmark {
@@ -46,6 +47,13 @@
   -ms-transition: background-color 200ms linear;
   transition: background-color 200ms linear;
   background-color: #ccc;
+}
+
+.checkbox-container:hover input ~ .trash {
+  opacity: 1;
+  -webkit-transition: opacity 200ms linear;
+  -ms-transition:  opacity 200ms linear;
+  transition:  opacity 200ms linear;
 }
 
 .checkbox:checked ~ label.checkbox-label {
@@ -88,4 +96,13 @@ button.clear-button {
   color: blue;
   text-decoration: underline;
   align-self: flex-start;
+}
+
+.trash {
+  opacity: 0;
+  -webkit-transition: opacity 200ms linear;
+  -ms-transition:  opacity 200ms linear;
+  transition:  opacity 200ms linear;
+  cursor: pointer;
+  margin-left: 10px;
 }

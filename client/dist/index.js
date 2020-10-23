@@ -5887,6 +5887,160 @@ var author$project$Main$checkItem = F3(
 			todo,
 			{isDone: !todo.isDone}) : todo;
 	});
+var author$project$Main$enterKey = 13;
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2(elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return elm$core$List$reverse(
+			A3(elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _n0 = _Utils_Tuple2(n, list);
+			_n0$1:
+			while (true) {
+				_n0$5:
+				while (true) {
+					if (!_n0.b.b) {
+						return list;
+					} else {
+						if (_n0.b.b.b) {
+							switch (_n0.a) {
+								case 1:
+									break _n0$1;
+								case 2:
+									var _n2 = _n0.b;
+									var x = _n2.a;
+									var _n3 = _n2.b;
+									var y = _n3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_n0.b.b.b.b) {
+										var _n4 = _n0.b;
+										var x = _n4.a;
+										var _n5 = _n4.b;
+										var y = _n5.a;
+										var _n6 = _n5.b;
+										var z = _n6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _n0$5;
+									}
+								default:
+									if (_n0.b.b.b.b && _n0.b.b.b.b.b) {
+										var _n7 = _n0.b;
+										var x = _n7.a;
+										var _n8 = _n7.b;
+										var y = _n8.a;
+										var _n9 = _n8.b;
+										var z = _n9.a;
+										var _n10 = _n9.b;
+										var w = _n10.a;
+										var tl = _n10.b;
+										return (ctr > 1000) ? A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A2(elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A3(elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _n0$5;
+									}
+							}
+						} else {
+							if (_n0.a === 1) {
+								break _n0$1;
+							} else {
+								break _n0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _n1 = _n0.b;
+			var x = _n1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var elm$core$List$take = F2(
+	function (n, list) {
+		return A3(elm$core$List$takeFast, 0, n, list);
+	});
+var author$project$Main$removeTodoByIndex = F2(
+	function (index, todos) {
+		return _Utils_ap(
+			A2(elm$core$List$take, index, todos),
+			A2(elm$core$List$drop, index + 1, todos));
+	});
 var elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5924,7 +6078,7 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'KeyPress':
 				var key = msg.a;
-				return (key === 13) ? _Utils_Tuple2(
+				return _Utils_eq(key, author$project$Main$enterKey) ? _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
@@ -5937,7 +6091,7 @@ var author$project$Main$update = F2(
 									]))
 						}),
 					elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			case 'Clear':
+			case 'ClearAllDone':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -5948,6 +6102,15 @@ var author$project$Main$update = F2(
 									return !todo.isDone;
 								},
 								model.todos)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'ClearTodo':
+				var index = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							todos: A2(author$project$Main$removeTodoByIndex, index, model.todos)
 						}),
 					elm$core$Platform$Cmd$none);
 			default:
@@ -6027,7 +6190,9 @@ var elm$html$Html$Events$onClick = function (msg) {
 		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$Checkbox$checkbox = F3(
-	function (msg, title, isDone) {
+	function (_n0, title, isDone) {
+		var toggle = _n0.toggle;
+		var clear = _n0.clear;
 		return A2(
 			elm$html$Html$div,
 			_List_fromArray(
@@ -6042,7 +6207,6 @@ var author$project$Checkbox$checkbox = F3(
 						[
 							elm$html$Html$Attributes$name(title),
 							elm$html$Html$Attributes$type_('checkbox'),
-							elm$html$Html$Events$onClick(msg),
 							elm$html$Html$Attributes$checked(isDone),
 							elm$html$Html$Attributes$class('checkbox')
 						]),
@@ -6052,7 +6216,7 @@ var author$project$Checkbox$checkbox = F3(
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$class('checkmark'),
-							elm$html$Html$Events$onClick(msg)
+							elm$html$Html$Events$onClick(toggle)
 						]),
 					_List_Nil),
 					A2(
@@ -6065,6 +6229,17 @@ var author$project$Checkbox$checkbox = F3(
 					_List_fromArray(
 						[
 							elm$html$Html$text(title)
+						])),
+					A2(
+					elm$html$Html$span,
+					_List_fromArray(
+						[
+							elm$html$Html$Events$onClick(clear),
+							elm$html$Html$Attributes$class('trash')
+						]),
+					_List_fromArray(
+						[
+							elm$html$Html$text('🗑️')
 						]))
 				]));
 	});
@@ -6085,7 +6260,10 @@ var author$project$Header$header = A2(
 var author$project$Main$ChangeText = function (a) {
 	return {$: 'ChangeText', a: a};
 };
-var author$project$Main$Clear = {$: 'Clear'};
+var author$project$Main$ClearAllDone = {$: 'ClearAllDone'};
+var author$project$Main$ClearTodo = function (a) {
+	return {$: 'ClearTodo', a: a};
+};
 var author$project$Main$KeyPress = function (a) {
 	return {$: 'KeyPress', a: a};
 };
@@ -6179,7 +6357,7 @@ var author$project$Main$view = function (model) {
 								elm$html$Html$button,
 								_List_fromArray(
 									[
-										elm$html$Html$Events$onClick(author$project$Main$Clear),
+										elm$html$Html$Events$onClick(author$project$Main$ClearAllDone),
 										elm$html$Html$Attributes$class('clear-button')
 									]),
 								_List_fromArray(
@@ -6201,7 +6379,10 @@ var author$project$Main$view = function (model) {
 								function (i, todo) {
 									return A3(
 										author$project$Checkbox$checkbox,
-										author$project$Main$Toggle(i),
+										{
+											clear: author$project$Main$ClearTodo(i),
+											toggle: author$project$Main$Toggle(i)
+										},
 										todo.content,
 										todo.isDone);
 								}),

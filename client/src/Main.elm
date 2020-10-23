@@ -7,7 +7,7 @@ import Html.Events exposing (onClick, onInput, on, keyCode)
 import Json.Decode as Json
 import Header exposing (header)
 import Checkbox exposing (checkbox)
-import Api exposing (Todo, getTodos)
+import Api exposing (Todo, getTodos, ApiAction)
 import Http
 
 main: Program () Model Action
@@ -46,30 +46,42 @@ type Action =
   Toggle Int
   | ChangeText String
   | KeyPress Int
-  | Clear
-  | GotTodos (Result Http.Error (List Todo))
+  | ClearAllDone
+  | ClearTodo Int
+  | GotTodos ApiAction
 
 
 onKeyPress: (Int -> msg) -> Attribute msg 
 onKeyPress mapper =
   on "keypress" (Json.map mapper keyCode)
 
+enterKey: Int
+enterKey = 13
+
 update : Action -> Model -> (Model, Cmd Action)
 update msg model =
    case msg of
         Toggle index ->
-            ({ model | todos = (List.indexedMap (checkItem index) model.todos ) }, Cmd.none)
+          ({ model | todos = (List.indexedMap (checkItem index) model.todos ) }, Cmd.none)
+
         ChangeText text -> 
-            ({ model | search = text }, Cmd.none)
+          ({ model | search = text }, Cmd.none)
+
         KeyPress key ->
-          if key == 13 then 
+          if key == enterKey then 
             ({ model | todos = model.todos ++ [{ content = model.search, isDone = False }], search = "" }, Cmd.none)
           else
             (model, Cmd.none)
-        Clear -> 
+
+        ClearAllDone -> 
           ({ model | todos = List.filter (\todo -> not todo.isDone) model.todos }, Cmd.none)
+
+        ClearTodo index -> 
+          ({ model | todos = removeTodoByIndex index model.todos }, Cmd.none)
+
         GotTodos (Ok res) ->
             ({ model | todos = res, response = Success }, Cmd.none)
+
         GotTodos (Err err) ->
           ({ model | response = Failure }, Cmd.none)
 
@@ -81,6 +93,10 @@ checkItem indexToCheck index todo =
     { todo | isDone = not todo.isDone }
   else
     todo
+
+removeTodoByIndex: Int -> (List Todo) -> List Todo
+removeTodoByIndex index todos = 
+  (List.take index todos) ++ (List.drop (index + 1) todos)
 
 subscriptions: Model -> Sub Action
 subscriptions model =
@@ -120,7 +136,7 @@ view model =
               ]
               []
           , button
-              [ onClick Clear, class "clear-button" ]
+              [ onClick ClearAllDone, class "clear-button" ]
               [text "Clear finished"]
           ]
         , div 
@@ -129,5 +145,5 @@ view model =
             , style "flex-direction" "column"
             , style "justify-content" "space-between"
             ]
-            <| List.indexedMap (\i todo -> checkbox (Toggle i) todo.content todo.isDone) model.todos
+            <| List.indexedMap (\i todo -> checkbox { toggle = (Toggle i), clear = (ClearTodo i) } todo.content todo.isDone) model.todos
         ]
