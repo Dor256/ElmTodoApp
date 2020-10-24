@@ -7,8 +7,8 @@ import Header exposing (header)
 import Html exposing (Html, button, div, main_, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Searchbar exposing (searchbar)
 import Http exposing (Error(..))
+import Searchbar exposing (searchbar)
 
 
 main : Program () Model Action

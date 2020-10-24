@@ -1,4 +1,4 @@
-import { fromFileUrl, dirname } from "https://deno.land/std/path/mod.ts";
+import { dirname, fromFileUrl } from "https://deno.land/std/path/mod.ts";
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
 
 export type Todo = {
@@ -44,8 +44,12 @@ export const api: Api = {
 
   checkTodo: (updatedTodo: Todo) => {
     const db = read();
-    const todos = db.todos.map((todo) => todo.id === updatedTodo.id ? { ...todo, isDone: !updatedTodo.isDone } : todo);
-    save({todos});
+    const todos = db.todos.map((todo) =>
+      todo.id === updatedTodo.id
+        ? { ...todo, isDone: !updatedTodo.isDone }
+        : todo
+    );
+    save({ todos });
   },
 
   deleteTodos: (ids: string[]) => {
@@ -57,6 +61,6 @@ export const api: Api = {
       const idSet = new Set(ids);
       todos = db.todos.filter((todo) => !idSet.has(todo.id));
     }
-    save({todos});
-  }
-}
+    save({ todos });
+  },
+};
