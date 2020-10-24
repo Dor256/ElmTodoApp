@@ -1,4 +1,4 @@
-module Main exposing (checkItem, removeTodoById, deleteFinishedTodos, init, subscriptions, update, view, Model)
+module Main exposing (Model, checkItem, deleteFinishedTodos, init, removeTodoById, subscriptions, update, view)
 
 import Api exposing (BatchAction, SingleAction, Todo, addTodo, deleteTodos, getTodos, toggleTodoCheck)
 import Browser exposing (element)
@@ -8,6 +8,7 @@ import Html exposing (Html, button, div, main_, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Searchbar exposing (searchbar)
+import Http exposing (Error(..))
 
 
 main : Program () Model Action
@@ -21,7 +22,7 @@ main =
 
 
 type Response
-    = Failure
+    = Failure String
     | Loading
     | Success
 
@@ -94,7 +95,7 @@ update action model =
             ( { model | todos = res, response = Success }, Cmd.none )
 
         GotTodos (Err err) ->
-            ( { model | response = Failure }, Cmd.none )
+            ( { model | response = Failure (errorToString err) }, Cmd.none )
 
         AddedTodo (Ok res) ->
             ( { model | todos = model.todos ++ [ { content = model.search, isDone = False, id = res.id } ], search = "" }, Cmd.none )
@@ -120,7 +121,7 @@ removeTodoById id todos =
     List.filter (\todo -> todo.id /= id) todos
 
 
-deleteFinishedTodos : (List Todo) -> (List Todo)
+deleteFinishedTodos : List Todo -> List Todo
 deleteFinishedTodos todos =
     List.filter (\todo -> not todo.isDone) todos
 
@@ -128,6 +129,31 @@ deleteFinishedTodos todos =
 getTodoById : List Todo -> String -> Maybe Todo
 getTodoById todos id =
     List.head (List.filter (\todo -> todo.id == id) todos)
+
+
+errorToString : Http.Error -> String
+errorToString err =
+    case err of
+        BadUrl url ->
+            "Invalid URL" ++ url
+
+        Timeout ->
+            "Request to the server timed out, try again"
+
+        NetworkError ->
+            "Network error, check your connection and try again"
+
+        BadStatus 500 ->
+            "Internal server error"
+
+        BadStatus 404 ->
+            "We couldn't find what you were looking for, please try again"
+
+        BadStatus _ ->
+            "There was an unknown error"
+
+        BadBody message ->
+            message
 
 
 subscriptions : Model -> Sub Action
@@ -138,8 +164,8 @@ subscriptions model =
 view : Model -> Html Action
 view model =
     case model.response of
-        Failure ->
-            text "Something went wrong!"
+        Failure err ->
+            text err
 
         Loading ->
             text "Loading..."
