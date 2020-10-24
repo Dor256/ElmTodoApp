@@ -49,7 +49,6 @@ export const api: Api = {
         ? { ...todo, isDone: !updatedTodo.isDone }
         : todo
     );
-
     save({ todos });
   },
 
