@@ -1,6 +1,6 @@
 module Checkbox exposing (checkbox)
-import Html exposing (..)
-import Html.Attributes exposing (style, type_, checked, class, name, for)
+import Html exposing (Html, div, input, span, label, text)
+import Html.Attributes exposing (type_, checked, class, name, for)
 import Html.Events exposing (onClick)
 
 type alias CheckboxActions action =

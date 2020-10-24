@@ -1,6 +1,6 @@
-module Searchbar exposing (..)
+module Searchbar exposing (searchbar)
 
-import Html exposing (..)
+import Html exposing (Html, input, Attribute)
 import Html.Attributes exposing (type_, placeholder, class, value)
 import Html.Events exposing (onInput, keyCode, on)
 import Json.Decode as Json

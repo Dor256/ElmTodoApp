@@ -1,16 +1,13 @@
 module Main exposing (init, update, view, subscriptions)
 
-import Browser exposing (..)
-import Html exposing (..)
-import Html.Attributes exposing (style, type_, placeholder, value, class)
-import Html.Events exposing (onClick, onInput, on, keyCode)
-import Json.Decode as Json
+import Browser exposing (element)
+import Html exposing (Html, div, button, text, main_)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Header exposing (header)
 import Checkbox exposing (checkbox)
 import Searchbar exposing (searchbar)
 import Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
-import Http
-import Array
 
 main: Program () Model Action
 main =
@@ -127,20 +124,12 @@ view model =
     Loading ->
       text "Loading..."
     Success ->
-      div
-        [
-          style "margin-left" "25%"
-        , style "margin-right" "25%"
-        , style "display" "flex"
-        , style "flex-direction" "column"
-        ]
+      main_
+        [ class "container" ]
         [
           header
         , div 
-          [
-            style "display" "flex"
-          , style "justify-content" "flex-end"
-          ]
+          [ class "search-container" ]
           [
             searchbar { onChange = ChangeText, onEnterPressed = KeyPress } model.search
           , button
@@ -148,10 +137,6 @@ view model =
               [text "Clear finished"]
           ]
         , div 
-            [
-              style "display" "flex"
-            , style "flex-direction" "column"
-            , style "justify-content" "space-between"
-            ]
+            [ class "checkbox-list" ]
             <| List.map (\todo -> checkbox { toggle = (Toggle todo.id), clear = (ClearTodo todo.id) } todo.content todo.isDone) model.todos
         ]

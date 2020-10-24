@@ -28,7 +28,7 @@
     {
       "id": "a80b0d8b-f6a4-4a0e-bc05-5d0d1336971a",
       "content": "Extract inline styles to CSS",
-      "isDone": false
+      "isDone": true
     }
   ]
 }

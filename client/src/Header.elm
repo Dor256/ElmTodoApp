@@ -1,6 +1,6 @@
 module Header exposing (header)
 
-import Html exposing (..)
+import Html exposing (Html, h1, text)
 import Html.Attributes exposing (class)
 
 header: Html msg

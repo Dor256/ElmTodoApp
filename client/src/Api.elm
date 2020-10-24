@@ -1,9 +1,8 @@
 module Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
 
-import Json.Decode as Decode exposing (field, bool, string, list, int)
-import Json.Encode as Encode
-import Http
-import Html.Attributes exposing (action)
+import Json.Decode as Decode exposing (field, bool, string, list, int, Decoder)
+import Json.Encode as Encode exposing (object, string, bool, Value)
+import Http exposing (get, post, request, expectJson, jsonBody, emptyBody)
 
 type alias Todo =
   { id: String, isDone: Bool, content: String }
@@ -62,18 +61,18 @@ deleteTodo action todo =
     Nothing ->
       Cmd.none
 
-todoListDecoder: Decode.Decoder (List Todo)
+todoListDecoder: Decoder (List Todo)
 todoListDecoder =
   list todoDecoder
 
-todoDecoder: Decode.Decoder Todo
+todoDecoder: Decoder Todo
 todoDecoder = 
   Decode.map3 Todo
-    (field "id" string)
-    (field "isDone" bool)
-    (field "content" string)
+    (field "id" Decode.string)
+    (field "isDone" Decode.bool)
+    (field "content" Decode.string)
 
-todoEncoder: Todo -> Encode.Value
+todoEncoder: Todo -> Value
 todoEncoder todo =
   Encode.object
     [ ("id", Encode.string todo.id)
