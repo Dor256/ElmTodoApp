@@ -16,7 +16,8 @@ checkbox { toggle, clear } title isDone =
       div 
       [ class "checkbox-container" ]
       [
-        span [ class "checkmark", onClick toggle ] []
+        input [ name title, type_ "checkbox", checked isDone, class "checkbox" ] []
+      , span [ class "checkmark", onClick toggle ] []
       , label [ for title, class "checkbox-label" ] [ text title ]
       , span [ onClick clear, class "trash" ] [ text "🗑️" ]
       ]

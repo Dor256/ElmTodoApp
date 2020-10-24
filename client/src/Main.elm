@@ -52,13 +52,7 @@ type Action =
   | ClearTodo String
   | GotTodos BatchAction
   | AddedTodo SingleAction
-  | UpdatedTodo SingleAction
-  | DeletedTodo SingleAction
-
-
--- onKeyPress: (Int -> msg) -> Attribute msg 
--- onKeyPress mapper =
---   on "keypress" (Json.map mapper keyCode)
+  | NoOp SingleAction
 
 enterKey: Int
 enterKey = 13
@@ -68,7 +62,7 @@ update msg model =
    case msg of
         Toggle id ->
           ({ model | todos = (List.map (checkItem id) model.todos ) }
-          , toggleTodoCheck UpdatedTodo (getTodoById model.todos id))
+          , toggleTodoCheck NoOp (getTodoById model.todos id))
 
         ChangeText text -> 
           ({ model | search = text }, Cmd.none)
@@ -86,11 +80,11 @@ update msg model =
 
         ClearTodo id -> 
           ({ model | todos = removeTodoById id model.todos }
-          , deleteTodo DeletedTodo (getTodoById model.todos id)
+          , deleteTodo NoOp (getTodoById model.todos id)
           )
 
         GotTodos (Ok res) ->
-            ({ model | todos = res, response = Success }, Cmd.none)
+          ({ model | todos = res, response = Success }, Cmd.none)
 
         GotTodos (Err err) ->
           ({ model | response = Failure }, Cmd.none)
@@ -101,18 +95,8 @@ update msg model =
         AddedTodo (Err err) -> 
           (model, Cmd.none)
         
-        UpdatedTodo (Ok res) ->
+        _ ->
           (model, Cmd.none)
-        
-        UpdatedTodo (Err err) -> 
-          (model, Cmd.none)
-
-        DeletedTodo (Ok res) ->
-          (model, Cmd.none)
-
-        DeletedTodo (Err err) ->
-          (model, Cmd.none)
-
 
 
 checkItem: String -> Todo -> Todo
