@@ -1,4 +1,4 @@
-module Main exposing (init, subscriptions, update, view)
+module Main exposing (checkItem, removeTodoById, deleteFinishedTodos, init, subscriptions, update, view, Model)
 
 import Api exposing (BatchAction, SingleAction, Todo, addTodo, deleteTodos, getTodos, toggleTodoCheck)
 import Browser exposing (element)
@@ -81,7 +81,7 @@ update action model =
                 ( model, Cmd.none )
 
         ClearAllDone ->
-            ( { model | todos = List.filter (\todo -> not todo.isDone) model.todos }
+            ( { model | todos = deleteFinishedTodos model.todos }
             , deleteTodos NoOpString (List.map (\todo -> todo.id) <| List.filter (\todo -> todo.isDone) model.todos)
             )
 
@@ -118,6 +118,11 @@ checkItem idToCheck todo =
 removeTodoById : String -> List Todo -> List Todo
 removeTodoById id todos =
     List.filter (\todo -> todo.id /= id) todos
+
+
+deleteFinishedTodos : (List Todo) -> (List Todo)
+deleteFinishedTodos todos =
+    List.filter (\todo -> not todo.isDone) todos
 
 
 getTodoById : List Todo -> String -> Maybe Todo
