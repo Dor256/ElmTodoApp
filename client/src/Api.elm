@@ -1,27 +1,40 @@
-module Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
+module Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodos)
 
 import Json.Decode as Decode exposing (field, bool, string, list, int, Decoder)
-import Json.Encode as Encode exposing (object, string, bool, Value)
+import Json.Encode as Encode exposing (object, string, bool, list, Value)
 import Http exposing (get, post, request, expectJson, jsonBody, emptyBody)
+import Html.Attributes exposing (action)
 
 type alias Todo =
   { id: String, isDone: Bool, content: String }
 
-type alias BatchAction = (Result Http.Error (List Todo))
-type alias SingleAction = (Result Http.Error Todo)
+type alias BatchAction item = (Result Http.Error (List item))
+type alias SingleAction item = (Result Http.Error item)
 
 baseUrl: String
 baseUrl = 
   "http://localhost:3000"
 
-getTodos: (BatchAction -> action) -> Cmd action
+getTodos: (BatchAction Todo -> action) -> Cmd action
 getTodos action = 
   Http.get
     { url = baseUrl ++ "/todos"
     , expect = Http.expectJson action todoListDecoder
     }
 
-addTodo: (SingleAction -> action) -> Todo -> Cmd action
+deleteTodos: (BatchAction String -> action) -> (List String) -> Cmd action
+deleteTodos action ids =
+  Http.request
+    { method = "DELETE"
+    , url = baseUrl ++ "/"
+    , body = Http.jsonBody (idListEncoder ids)
+    , expect = Http.expectJson action idListDecoder
+    , headers = []
+    , timeout = Nothing
+    , tracker = Nothing
+    }
+
+addTodo: (SingleAction Todo -> action) -> Todo -> Cmd action
 addTodo action todo =
   Http.post
     { body = Http.jsonBody (todoEncoder todo)
@@ -29,7 +42,7 @@ addTodo action todo =
     , expect = Http.expectJson action todoDecoder
     }
 
-toggleTodoCheck: (SingleAction -> action) -> Maybe Todo -> Cmd action
+toggleTodoCheck: (SingleAction Todo -> action) -> Maybe Todo -> Cmd action
 toggleTodoCheck action todo =
   case todo of
     Just aTodo ->
@@ -45,25 +58,9 @@ toggleTodoCheck action todo =
     Nothing ->
       Cmd.none
 
-deleteTodo: (SingleAction -> action) -> Maybe Todo -> Cmd action
-deleteTodo action todo =
-  case todo of
-    Just aTodo ->
-      Http.request
-        { method = "DELETE"
-        , url = baseUrl ++ "/" ++ aTodo.id
-        , body = Http.emptyBody
-        , expect = Http.expectJson action todoDecoder
-        , headers = []
-        , timeout = Nothing
-        , tracker = Nothing
-        }
-    Nothing ->
-      Cmd.none
-
 todoListDecoder: Decoder (List Todo)
 todoListDecoder =
-  list todoDecoder
+  Decode.list todoDecoder
 
 todoDecoder: Decoder Todo
 todoDecoder = 
@@ -71,6 +68,15 @@ todoDecoder =
     (field "id" Decode.string)
     (field "isDone" Decode.bool)
     (field "content" Decode.string)
+
+idListDecoder: Decoder (List String)
+idListDecoder = 
+  Decode.list Decode.string
+
+
+idListEncoder: (List String) -> Value
+idListEncoder ids =
+  Encode.list Encode.string ids
 
 todoEncoder: Todo -> Value
 todoEncoder todo =

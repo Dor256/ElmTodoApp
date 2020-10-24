@@ -24,11 +24,13 @@ app.post('/', (req, res) => {
 app.put('/', (req, res) => {
   const todo: Todo = req.parsedBody;
   api.checkTodo(todo);
+  res.sendStatus(200);
 });
 
-app.delete('/:id', (req, res) => {
-  const idToDelete = req.params.id;
-  api.deleteTodo(idToDelete);
+app.delete('/', (req, res) => {
+  const idsToDelete: string[] = req.parsedBody;
+  api.deleteTodos(idsToDelete);
+  res.sendStatus(200)
 });
 
 app.get('/todos', (req, res) => {

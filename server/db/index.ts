@@ -23,7 +23,7 @@ export interface Api {
   getTodos(): Todo[];
   addTodo(todo: Todo): Todo;
   checkTodo(todo: Todo): void;
-  deleteTodo(id: string): void
+  deleteTodos(ids: string[]): void;
 }
 
 export const api: Api = {
@@ -48,9 +48,15 @@ export const api: Api = {
     save({todos});
   },
 
-  deleteTodo: (id: string) => {
+  deleteTodos: (ids: string[]) => {
     const db = read();
-    const todos = db.todos.filter((todo) => todo.id !== id);
+    let todos: Todo[] = [];
+    if (ids.length === 1) {
+      todos = db.todos.filter((todo) => todo.id !== ids[0]);
+    } else {
+      const idSet = new Set(ids);
+      todos = db.todos.filter((todo) => !idSet.has(todo.id));
+    }
     save({todos});
   }
 }

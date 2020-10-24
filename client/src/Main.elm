@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Header exposing (header)
 import Checkbox exposing (checkbox)
 import Searchbar exposing (searchbar)
-import Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodo)
+import Api exposing (Todo, getTodos, BatchAction, addTodo, SingleAction, toggleTodoCheck, deleteTodos)
 
 main: Program () Model Action
 main =
@@ -40,26 +40,26 @@ init _ =
     getTodos GotTodos
   )
 
-
 type Action = 
   Toggle String
   | ChangeText String
   | KeyPress Int
   | ClearAllDone
   | ClearTodo String
-  | GotTodos BatchAction
-  | AddedTodo SingleAction
-  | NoOp SingleAction
+  | GotTodos (BatchAction Todo)
+  | AddedTodo (SingleAction Todo)
+  | NoOpTodo (SingleAction Todo)
+  | NoOpString (SingleAction (List String))
 
 enterKey: Int
 enterKey = 13
 
 update : Action -> Model -> (Model, Cmd Action)
-update msg model =
-   case msg of
+update action model =
+   case action of
         Toggle id ->
           ({ model | todos = (List.map (checkItem id) model.todos ) }
-          , toggleTodoCheck NoOp (getTodoById model.todos id))
+          , toggleTodoCheck NoOpTodo (getTodoById model.todos id))
 
         ChangeText text -> 
           ({ model | search = text }, Cmd.none)
@@ -73,11 +73,12 @@ update msg model =
             (model, Cmd.none)
 
         ClearAllDone -> 
-          ({ model | todos = List.filter (\todo -> not todo.isDone) model.todos }, Cmd.none)
+          ({ model | todos = List.filter (\todo -> not todo.isDone) model.todos }
+          , deleteTodos NoOpString (List.map (\todo -> todo.id) <| List.filter (\todo -> todo.isDone) model.todos))
 
         ClearTodo id -> 
           ({ model | todos = removeTodoById id model.todos }
-          , deleteTodo NoOp (getTodoById model.todos id)
+          , deleteTodos NoOpString [id]
           )
 
         GotTodos (Ok res) ->
@@ -116,7 +117,7 @@ subscriptions: Model -> Sub Action
 subscriptions model =
     Sub.none
 
-view: Model -> Html Action
+view: Model -> (Html Action)
 view model =
   case model.response of
     Failure -> 
